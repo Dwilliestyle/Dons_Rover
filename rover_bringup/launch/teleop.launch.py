@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+
+"""
+Teleop launch file for UGV Rover
+Launches joystick nodes for manual control
+Can be launched separately or included with robot.launch.py
+"""
+
+from launch import LaunchDescription
+from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+from ament_index_python.packages import get_package_share_directory
+import os
+
+def generate_launch_description():
+    # Get the path to the config file
+    pkg_share = get_package_share_directory('rover_bringup')
+    config_file = os.path.join(pkg_share, 'config', 'rover_params.yaml')
+    
+    # Declare launch arguments
+    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    joy_dev = LaunchConfiguration('joy_dev', default='/dev/input/js0')
+    
+    return LaunchDescription([
+        # Declare launch arguments
+        DeclareLaunchArgument(
+            'use_sim_time',
+            default_value='false',
+            description='Use simulation time if true'
+        ),
+        
+        DeclareLaunchArgument(
+            'joy_dev',
+            default_value='/dev/input/js0',
+            description='Joystick device path'
+        ),
+        
+        # Joy Node
+        # Reads joystick input and publishes to /joy topic
+        Node(
+            package='joy',
+            executable='joy_node',
+            name='joy_node',
+            parameters=[
+                {
+                    'device_id': joy_dev,
+                    'deadzone': 0.05,
+                    'autorepeat_rate': 20.0,
+                    'use_sim_time': use_sim_time
+                }
+            ],
+            output='screen',
+            emulate_tty=True,
+        ),
+        
+        # Joy Teleop Node
+        # Converts joystick commands to cmd_vel messages
+        Node(
+            package='rover_bringup',
+            executable='joy_teleop.py',
+            name='joy_teleop',
+            parameters=[
+                config_file,
+                {'use_sim_time': use_sim_time}
+            ],
+            output='screen',
+            emulate_tty=True,
+        ),
+    ])
