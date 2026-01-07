@@ -10,7 +10,6 @@ import time
 import subprocess
 import os
 from std_msgs.msg import Header, Float32MultiArray, Float32
-from std_srvs.srv import SetBool
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Imu, MagneticField, JointState
 from rover_msgs.srv import SetLEDBrightness
@@ -137,7 +136,7 @@ class ESP32Bridge(Node):
         # Subscribers for command data
         self.cmd_vel_sub_ = self.create_subscription(Twist, "cmd_vel", self.cmd_vel_callback, 10)
         self.joint_states_sub = self.create_subscription(JointState, 'ugv/joint_states', self.joint_states_callback, 10)
-        self.led_service = self.create_service(SetBool, 'ugv/set_headlights', self.led_service_callback)
+        self.led_service = self.create_service(SetLEDBrightness, 'ugv/set_headlights', self.led_service_callback)
         
         # Timer to periodically read sensor feedback
         timer_period = 1.0 / feedback_rate
