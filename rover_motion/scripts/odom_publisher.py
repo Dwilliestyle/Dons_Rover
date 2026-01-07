@@ -19,7 +19,7 @@ class OdomPublisher(Node):
         self.declare_parameter('base_footprint_frame', 'base_footprint')
         self.declare_parameter('base_frame', 'base_link')
         self.declare_parameter('pub_odom_tf', True)
-        self.declare_parameter('wheel_separation', 0.070)  # meters - track width
+        self.declare_parameter('wheel_separation', 0.284)  # meters - track width
         self.declare_parameter('publish_rate', 10.0)      # Hz
         self.declare_parameter('use_imu_heading', False)  # Use IMU yaw instead of wheel odometry
         
