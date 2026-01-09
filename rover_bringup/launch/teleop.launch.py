@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-
 """
 Teleop launch file for UGV Rover
-Launches joystick nodes for manual control
+Launches joystick OR keyboard teleop for manual control
 Can be launched separately or included with robot.launch.py
 """
-
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
+from launch.conditions import IfCondition, UnlessCondition
 from ament_index_python.packages import get_package_share_directory
 import os
 
@@ -21,6 +20,7 @@ def generate_launch_description():
     # Declare launch arguments
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     joy_dev = LaunchConfiguration('joy_dev', default='/dev/input/js0')
+    use_joystick = LaunchConfiguration('use_joystick', default='true')
     
     return LaunchDescription([
         # Declare launch arguments
@@ -36,8 +36,13 @@ def generate_launch_description():
             description='Joystick device path'
         ),
         
-        # Joy Node
-        # Reads joystick input and publishes to /joy topic
+        DeclareLaunchArgument(
+            'use_joystick',
+            default_value='true',
+            description='Use joystick teleop if true, keyboard teleop if false'
+        ),
+        
+        # Joy Node - only launch if use_joystick is true
         Node(
             package='joy',
             executable='joy_node',
@@ -52,10 +57,10 @@ def generate_launch_description():
             ],
             output='screen',
             emulate_tty=True,
+            condition=IfCondition(use_joystick)
         ),
         
-        # Joy Teleop Node
-        # Converts joystick commands to cmd_vel messages
+        # Joy Teleop Node - only launch if use_joystick is true
         Node(
             package='rover_bringup',
             executable='joy_teleop.py',
@@ -66,5 +71,20 @@ def generate_launch_description():
             ],
             output='screen',
             emulate_tty=True,
+            condition=IfCondition(use_joystick)
+        ),
+        
+        # Keyboard Teleop Node - only launch if use_joystick is false
+        Node(
+            package='rover_bringup',
+            executable='keyboard_teleop.py',
+            name='keyboard_teleop',
+            parameters=[
+                config_file,
+                {'use_sim_time': use_sim_time}
+            ],
+            output='screen',
+            emulate_tty=True,
+            condition=UnlessCondition(use_joystick)
         ),
     ])

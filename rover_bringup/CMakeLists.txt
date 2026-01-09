@@ -14,6 +14,7 @@ find_package(rclpy REQUIRED)
 install(PROGRAMS
   scripts/esp32_bridge.py
   scripts/joy_teleop.py
+  scripts/keyboard_teleop.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
