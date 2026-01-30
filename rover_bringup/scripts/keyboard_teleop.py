@@ -23,8 +23,8 @@ DEFAULT_MAX_LIN_VEL = 0.5   # m/s
 DEFAULT_MAX_ANG_VEL = 2.0   # rad/s
 
 # Step sizes for incremental control
-LIN_VEL_STEP_SIZE = 0.02    # 2 cm/s per keypress (smaller steps for SLAM)
-ANG_VEL_STEP_SIZE = 0.1     # 0.1 rad/s per keypress
+LIN_VEL_STEP_SIZE = 0.1    # increased the step size for more stable speed
+ANG_VEL_STEP_SIZE = 0.5     # 0.5 rad/s per keypress
 
 msg = """
 Control Your UGV Rover!
