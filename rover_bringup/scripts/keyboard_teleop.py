@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys, select, termios, tty
 
 import rclpy
@@ -129,8 +129,12 @@ def main():
 			twist.angular.z = turn * th
 			if not stop: ugv_keyboard.pub.publish(twist)
 			if stop:ugv_keyboard.pub.publish(Twist())
-	except Exception as e: print(e)
+	except Exception as e: 
+		print(e)
 	finally: ugv_keyboard.pub.publish(Twist())
 	termios.tcsetattr(sys.stdin, termios.TCSADRAIN, ugv_keyboard.settings)
 	ugv_keyboard.destroy_node()
 	rclpy.shutdown()
+
+if __name__ == '__main__':
+	main()
