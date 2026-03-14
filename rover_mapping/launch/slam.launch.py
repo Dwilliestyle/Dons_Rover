@@ -8,6 +8,7 @@ Assumes rover_bringup robot.launch.py is already running, which provides:
   - robot_state_publisher   -> base_footprint->base_link TF (from URDF)
 
 This launch file adds:
+  - USB camera driver (usb_cam) -> /image_raw
   - Camera viewer (rover_vision)
   - SLAM Toolbox (async, lifecycle-managed)
 
@@ -25,11 +26,12 @@ Full mapping session workflow:
   ros2 launch rover_mapping map_saver.launch.py map_name:=my_room
 
 Optional args:
-  ros2 launch rover_mapping slam.launch.py show_window:=false  # SSH without X11
+  ros2 launch rover_mapping slam.launch.py camera_device:=/dev/video2
 
 Prerequisites:
   sudo apt install ros-jazzy-slam-toolbox
   sudo apt install ros-jazzy-nav2-map-server
+  sudo apt install ros-jazzy-usb-cam
 """
 
 import os
@@ -59,6 +61,11 @@ def generate_launch_description():
         default_value='false',
         description='Use simulation clock'
     )
+    camera_device_arg = DeclareLaunchArgument(
+        'camera_device',
+        default_value='/dev/video0',
+        description='USB camera device path'
+    )
     image_topic_arg = DeclareLaunchArgument(
         'image_topic',
         default_value='/image_raw',
@@ -66,8 +73,8 @@ def generate_launch_description():
     )
     show_window_arg = DeclareLaunchArgument(
         'show_window',
-        default_value='true',
-        description='Show OpenCV window (set to false when SSH without X11)'
+        default_value='false',
+        description='Show OpenCV window (set to true only with X11 forwarding)'
     )
     use_config_arg = DeclareLaunchArgument(
         'use_config',
@@ -75,7 +82,27 @@ def generate_launch_description():
         description='Use config file or command line parameters'
     )
 
-    use_sim_time = LaunchConfiguration('use_sim_time')
+    use_sim_time   = LaunchConfiguration('use_sim_time')
+    camera_device  = LaunchConfiguration('camera_device')
+
+    # -- USB Camera Driver -----------------------------------------------------
+    # Publishes /image_raw (sensor_msgs/Image)
+    # If your camera doesn't appear on /dev/video0, pass camera_device:=/dev/video2
+    usb_cam_node = Node(
+        package='usb_cam',
+        executable='usb_cam_node_exe',
+        name='usb_cam',
+        parameters=[{
+            'video_device': camera_device,
+            'image_width': 640,
+            'image_height': 480,
+            'framerate': 30.0,
+            'pixel_format': 'yuyv',
+            'camera_frame_id': 'camera_link',
+            'io_method': 'mmap',
+        }],
+        output='screen',
+    )
 
     # -- Camera Viewer ---------------------------------------------------------
     rover_vision_config = os.path.join(
@@ -148,9 +175,11 @@ def generate_launch_description():
 
     return LaunchDescription([
         use_sim_time_arg,
+        camera_device_arg,
         image_topic_arg,
         show_window_arg,
         use_config_arg,
+        usb_cam_node,
         camera_viewer,
         slam_delayed,
     ])
