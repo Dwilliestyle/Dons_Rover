@@ -13,8 +13,8 @@
     
     # Physical Robot Parameters (from URDF)
     wheel_radius: 0.040        # meters (40mm wheels)
-    wheel_separation: 0.070    # meters (70mm track width)
-    wheelbase: 0.100          # meters (distance between front and rear axles)
+    wheel_separation: 0.1778    # meters (70mm track width)
+    wheelbase: 0.1699          # meters (distance between front and rear axles)
     
     # Speed Limits
     max_linear_speed: 0.5      # m/s - maximum forward/backward speed
