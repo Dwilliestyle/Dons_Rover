@@ -86,6 +86,27 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True,
         ),
+
+        # IMU Filter (Madgwick)
+        # Fuses accelerometer, gyroscope and magnetometer into stable orientation
+        # Publishes filtered /imu/data used by odom_publisher for heading
+        Node(
+            package='imu_filter_madgwick',
+            executable='imu_filter_madgwick_node',
+            name='imu_filter',
+            parameters=[{
+                'use_mag': True,
+                'publish_tf': False,
+                'world_frame': 'enu',
+                'gain': 0.1,
+            }],
+            remappings=[
+                ('imu/data_raw', 'imu/data_raw'),
+                ('imu/mag',      'imu/mag'),
+                ('imu/data',     'imu/data'),
+            ],
+            output='screen',
+        ),
         
         # Robot State Publisher
         # Publishes robot description and static transforms from URDF
