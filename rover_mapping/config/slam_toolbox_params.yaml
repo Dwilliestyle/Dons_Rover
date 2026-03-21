@@ -7,6 +7,8 @@
     ceres_trust_strategy: LEVENBERG_MARQUARDT
     ceres_dogleg_type: TRADITIONAL_DOGLEG
     ceres_loss_function: None
+    transform_publish_period: 0.02
+    tf_buffer_duration: 30.0
 
     # ROS Parameters
     odom_frame: odom
@@ -15,8 +17,8 @@
     scan_topic: /scan
     use_scan_matching: true
     use_scan_barycenter: true
-    minimum_travel_distance: 0.3
-    minimum_travel_heading: 0.3
+    minimum_travel_distance: 0.5
+    minimum_travel_heading: 0.5
     scan_buffer_size: 10
     scan_buffer_maximum_scan_distance: 10.0
     link_match_minimum_response_fine: 0.1  
