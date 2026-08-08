@@ -29,6 +29,5 @@ My ROS2 Jazzy-based autonomous robot built on the Waveshare UGV Rover platform w
 - **rover_msgs** - Custom messages and services (Patrol action, LED control)
 - **rover_navigation** - SLAM configuration and mapping
 - **rover_utils** - Battery monitoring, OLED display, safety stop
-- **rover_example** - Example patrol behavior client/server
 
 
