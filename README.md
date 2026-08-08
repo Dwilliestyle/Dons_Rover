@@ -2,7 +2,7 @@
 
 My ROS2 Jazzy-based autonomous robot built on the Waveshare UGV Rover platform with custom modular packages.
 
-![UGV Rover](images/rover.jpg)
+![UGV Rover](images/Rover.jpg)
 
 ## Hardware
 
