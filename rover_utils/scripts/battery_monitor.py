@@ -4,6 +4,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
 import subprocess
+import threading
 
 try:
     import smbus
@@ -72,13 +73,29 @@ class BatteryMonitor(Node):
         """Play an audible warning using espeak"""
         if not self.enable_espeak:
             return
-            
+
         try:
-            subprocess.Popen(
-                ['espeak', '-v', self.espeak_voice, '-s', str(self.espeak_speed), message],
-                stdout=subprocess.DEVNULL,
+            espeak_proc = subprocess.Popen(
+                ['espeak', '--stdout', '-v', self.espeak_voice, '-s', str(self.espeak_speed), message],
+                stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL
             )
+            aplay_proc = subprocess.Popen(
+                ['aplay', '-D', 'plughw:USBAudio,0'],
+                stdin=espeak_proc.stdout,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE
+            )
+            espeak_proc.stdout.close()  # let aplay receive SIGPIPE if espeak exits early
+
+            def _log_aplay_errors(proc, logger):
+                err = proc.communicate()[1]
+                if proc.returncode != 0:
+                    logger.error(f'aplay failed: {err.decode(errors="ignore")}')
+            threading.Thread(
+                target=_log_aplay_errors, args=(aplay_proc, self.get_logger()), daemon=True
+            ).start()
+
             self.get_logger().info(f'Espeak warning: "{message}"')
         except Exception as e:
             self.get_logger().error(f'Failed to trigger espeak: {e}')
