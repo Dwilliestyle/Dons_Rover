@@ -6,32 +6,49 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
-    
+
     # Get package directory
     pkg_dir = get_package_share_directory('rover_vision')
-    
+
     # Config file path
     config_file = os.path.join(pkg_dir, 'config', 'camera_params.yaml')
-    
+
     # Declare arguments
     image_topic_arg = DeclareLaunchArgument(
         'image_topic',
         default_value='/image_raw',
         description='Camera image topic to subscribe to'
     )
-    
+
     show_window_arg = DeclareLaunchArgument(
         'show_window',
         default_value='true',
         description='Show OpenCV window (set to false when SSH without X11)'
     )
-    
+
     use_config_arg = DeclareLaunchArgument(
         'use_config',
         default_value='true',
         description='Use config file or command line parameters'
     )
-    
+
+    # USB camera driver - publishes to /image_raw for camera_viewer to subscribe to
+    usb_cam_node = Node(
+        package='usb_cam',
+        executable='usb_cam_node_exe',
+        name='usb_cam',
+        output='screen',
+        parameters=[{
+            'video_device': '/dev/video0',      # confirm with `ls /dev/video*` on rover
+            'image_width': 640,
+            'image_height': 480,
+            'pixel_format': 'yuyv',             # try 'mjpeg2rgb' if yuyv is too slow/CPU-heavy
+            'camera_name': 'rover_camera',
+            'io_method': 'mmap',
+            'framerate': 30.0,
+        }]
+    )
+
     # Camera viewer node
     camera_viewer = Node(
         package='rover_vision',
@@ -43,10 +60,11 @@ def generate_launch_description():
             'show_window': LaunchConfiguration('show_window'),
         }]
     )
-    
+
     return LaunchDescription([
         image_topic_arg,
         show_window_arg,
         use_config_arg,
+        usb_cam_node,
         camera_viewer
     ])
