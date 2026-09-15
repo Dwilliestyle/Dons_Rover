@@ -49,6 +49,14 @@ def generate_launch_description():
         }]
     )
 
+    # Web video server - browser-viewable stream of /image_raw at http://<rover-ip>:8080
+    web_video_server_node = Node(
+        package='web_video_server',
+        executable='web_video_server',
+        name='web_video_server',
+        output='screen',
+    )
+
     # Camera viewer node
     camera_viewer = Node(
         package='rover_vision',
@@ -66,5 +74,6 @@ def generate_launch_description():
         show_window_arg,
         use_config_arg,
         usb_cam_node,
+        web_video_server_node,
         camera_viewer
     ])
