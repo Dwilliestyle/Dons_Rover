@@ -6,6 +6,9 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
 from rover_msgs.srv import SetLEDBrightness
+
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 
 
