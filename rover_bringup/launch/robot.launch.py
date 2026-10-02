@@ -19,9 +19,13 @@ def generate_launch_description():
     # Get path to ldlidar launch file
     ldlidar_pkg_share = get_package_share_directory('ldlidar_stl_ros2')
     ldlidar_launch = os.path.join(ldlidar_pkg_share, 'launch', 'ld19.launch.py')
+
+    # Get path to teleop launch file
+    teleop_launch = os.path.join(pkg_share, 'launch', 'teleop.launch.py')
     
     # Declare launch arguments
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    use_joystick = LaunchConfiguration('use_joystick', default='true')
     
     return LaunchDescription([
         # Declare launch arguments
@@ -29,6 +33,12 @@ def generate_launch_description():
             'use_sim_time',
             default_value='false',
             description='Use simulation time if true'
+        ),
+
+        DeclareLaunchArgument(
+            'use_joystick',
+            default_value='true',
+            description='Use joystick teleop if true, keyboard teleop if false'
         ),
         
         # ESP32 Bridge Node
@@ -138,6 +148,15 @@ def generate_launch_description():
             launch_arguments={
                 'port_name': '/dev/ttyACM0',
                 'frame_id': 'laser_frame'
+            }.items()
+        ),
+
+        # Teleop (joystick or keyboard)
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(teleop_launch),
+            launch_arguments={
+                'use_sim_time': use_sim_time,
+                'use_joystick': use_joystick,
             }.items()
         ),
     ])
