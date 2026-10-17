@@ -4,6 +4,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
+from rclpy.executors import ExternalShutdownException
 
 class CameraViewer(Node):
     def __init__(self):
@@ -91,16 +92,15 @@ class CameraViewer(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    
+    node = CameraViewer()
     try:
-        viewer = CameraViewer()
-        rclpy.spin(viewer)
-    except KeyboardInterrupt:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
-        viewer.destroy_node()
-        rclpy.shutdown()
-        cv2.destroyAllWindows()
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
