@@ -82,6 +82,11 @@ class JoyTeleop(Node):
         self.last_light_up_state = 0
         self.last_light_down_state = 0
 
+        # True while the sticks are commanding motion. Used so this node only
+        # publishes cmd_vel while driving (plus one stop message on release),
+        # leaving /cmd_vel free for Nav2 when the joystick is idle.
+        self.driving = False
+
         # Detect joystick
         joysticks = get_joystick_names()
         self.joystick = joysticks[0] if len(joysticks) != 0 else None
@@ -129,15 +134,20 @@ class JoyTeleop(Node):
         linear_speed = max(-self.max_linear_speed, min(self.max_linear_speed, linear_speed))
         angular_speed = max(-self.max_angular_speed, min(self.max_angular_speed, angular_speed))
 
-        twist = Twist()
-        twist.linear.x = linear_speed
-        twist.linear.y = 0.0
-        twist.linear.z = 0.0
-        twist.angular.x = 0.0
-        twist.angular.y = 0.0
-        twist.angular.z = angular_speed
+        moving = linear_speed != 0.0 or angular_speed != 0.0
 
-        self.pub_cmd_vel.publish(twist)
+        if moving:
+            # Sticks are active: drive (this also overrides Nav2 while held)
+            twist = Twist()
+            twist.linear.x = linear_speed
+            twist.angular.z = angular_speed
+            self.pub_cmd_vel.publish(twist)
+            self.driving = True
+        elif self.driving:
+            # Sticks just released: send one stop command, then go quiet
+            self.pub_cmd_vel.publish(Twist())
+            self.driving = False
+        # else: joystick idle -> publish nothing, so Nav2 owns /cmd_vel
 
     def filter_deadzone(self, value):
         """Filter out small joystick values to prevent drift"""
