@@ -98,8 +98,8 @@ controller_server:
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.3
+      yaw_goal_tolerance: 0.5
     FollowPath:
       # Regulated Pure Pursuit - light enough for the Pi, tuned for a heavy 6-wheel skid steer
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
